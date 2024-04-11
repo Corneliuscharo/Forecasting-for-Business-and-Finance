@@ -1,0 +1,228 @@
+---
+title: "BU52023 – Forecasting for Business and Finance - Lab Assignment"
+output: word_document
+date: "2024-03-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##  Question 1  
+
+# Load the required libraries
+```{r}
+library(readxl)
+library(ggplot2)
+library(tidyverse)
+library(fpp2)
+```
+
+
+
+# Load the datasets from excel
+```{r}
+data1 <- read_excel("C:/Users/ELITEX21012G2/Downloads/UK_CPI_r.xlsx")
+data2 <- read_excel("C:/Users/ELITEX21012G2/Downloads/UK_CPI_r_res1.xlsx")
+data3 <- read_excel("C:/Users/ELITEX21012G2/Downloads/UK_CPI_r_res2.xlsx")
+
+```
+
+
+
+# Question 2
+# (a) Full sample time series from 1960Q1 to 2019Q4
+```{r}
+full_series <- ts(data1[[2]], frequency=4, start = c(1960, 1), end = c(2019, 4))
+
+```
+
+
+# (b) Restricted sample time series from 1960Q1 to 2000Q4
+```{r}
+restricted_series_1 <- ts(data1[[2]][1:163], frequency = 4, start = c(1960, 1), end = c(2000, 4))
+```
+
+
+# (c) Another restricted sample time series from 1974Q1 to 1988Q4
+```{r}
+restricted_series_2 <- ts(data1[[2]][57:168], frequency = 4, start = c(1974, 1), end = c(1988, 4))
+```
+
+
+#  Question 3
+```{r}
+# Plotting the time series
+plot(restricted_series_1, main = "UK CPI Time Series (1960Q1 to 2000Q4)", xlab = "Quarter", ylab = "CPI")
+
+
+# Adding a trend line to observe the trend
+trend <- stats::filter(restricted_series_1, rep(1, 5)/5)  # Moving average with a window size of 5 quarters
+lines(trend, col = "blue")
+
+# Adding grid lines for better visualization
+grid()
+
+# Adding seasonal subseries plot to observe seasonality
+seasonplot(restricted_series_1)
+```
+
+
+#  Observations
+
+The main plot is on a rising line so distinct to sing out. On the other hand, there are also other loops that acts as a periodical pattern across the seasonal subseries graph, it implies that the seasonality has occurred.
+
+The main plot line result in barely appearance and seasonal sub plot imply were no crack, therefore the series could be stationary.
+
+
+##  Question 4
+
+```{r}
+# Plotting the time series
+plot(restricted_series_2, main = "UK CPI Time Series (1974Q1 to 1988Q4)", xlab = "Quarter", ylab = "CPI")
+
+# Adding grid lines for better visualization
+grid()
+
+# Adding seasonal subseries plot to observe seasonality
+seasonplot(restricted_series_2)
+
+```
+
+The graph represented in the CPI series plot of UK from 1974 Q1 to 1988 Q4, point to a consistently increasing curve. The values generally grow over time, meaning there exists a trend.
+Also this subseries helps become apparent seasonal regularity of the flow at the changes of the seasons. Every year displays the same type of rise and fall, which signifies the nature of the seasonality.
+Pattern:
+The pattern reveals an overall uptrend with seasonal fluctuations occasionally observed. This data gives evidence for a long-term trend of rising CPI values as well as a seasonal pattern of their miniature fluctuations over the course of each year.
+
+According to the visual evidence, the particular series is rather not completely static. Co-existence of trend and seasonality brings into attention the nonstationarity. The overall uptrend and regular seasonalities suggest that the series can be differentiated from stationary time series, which is the case of constancy in mean and variance throughout the time periods.
+
+In summary, the UK CPI time series displays a trend along which seasonal variability is present. The series is seen to exhibit an uptrend with seasonal fluctuations happening on a regular basis, thus hinting at a non-stationary case.
+
+#  Question 5
+
+```{r}
+# Create log CPI variable
+log_CPI <- log(restricted_series_2)
+
+# Plotting CPI and log CPI side-by-side
+par(mfrow=c(1,2))  # Set up side-by-side plotting
+plot(restricted_series_2, main = "CPI Time Series (1974Q1 to 1988Q4)", xlab = "Quarter", ylab = "CPI")
+plot(log_CPI, main = "Log CPI Time Series (1974Q1 to 1988Q4)", xlab = "Quarter", ylab = "Log CPI")
+
+```
+Using the CPI and log CPI time series from the period 1974Q1 to 1988Q4, the trends and volatility differs remarkably. The CPI series has an irregular pattern that can be said to have growing variances over time, which will make the trends emerging harder to interpret due to fluctuations and non-constant variances. Rather, log CPI time series holds firmly on the ground and displays consistence in variance, causing smoother movements and visible trends that provide easier interpretation. The log-transformation, on the other hand, is used in order to steady the variation, linearize trends and ease the analyzing. This log transformation provides us with more homoscedastic data which helps us to not worry much about the variance which might increase or fluctuate for economic data like CPI. Moreover, the transform takes exponential growths to straight line representations and satisfy the need for data to follow a normal distribution and constant variance by linear models. This makes statistically analyzing and forecasting better.
+
+# Question 6
+
+```{r}
+# Plot and compare the autocorrelation functions (ACFs) for the CPI and log CPI series
+library(urca)
+par(mfrow=c(1,2))  # Set up side-by-side plotting
+acf(restricted_series_2, main = "ACF for CPI Series")
+acf(log_CPI, main = "ACF for Log CPI Series")
+
+# Formal test of stationarity (Augmented Dickey-Fuller test)
+adf_test_CPI <- ur.df(restricted_series_2, type = "drift", lags = 4)
+adf_test_log_CPI <- ur.df(log_CPI, type = "drift", lags = 4)
+
+# Summary of test results
+summary(adf_test_CPI)
+summary(adf_test_log_CPI)
+
+```
+
+# Autocorrelation Functions (ACFs)
+# CPI Series ACF
+Slow decay in autocorrelation values.
+Large jumps at various lags.
+Identifies the cointegration and possible nonstationarity.
+# Log CPI Series ACF
+Quick reduction of cross correlation values.
+No significant spikes.
+Indicates seemingly less correlated autocorrelation and the possibility of stationarity instead of CPI.
+undefined
+# CPI Series ADF Test
+Test statistic: -1.3303.
+p-value: 0.18957.
+Accept a unit root with a conventional level of significance (e.g., 5%) by failing to reject the null hypothesis.
+Indicates non-stationarity.
+undefined
+Test statistic: -2.4648.
+p-value: 0.0173.
+Reject the null hypothesis of a unit root at the conventional significance levels (e.g., 5%).
+Suggests stationarity.
+# Decision and Justification
+On the basis of these plots and this test, it seems that the log CPI series is more appropriate for further analysis.
+# Justification
+The log CPI data displays weaker serial dependency and passes the ADF test for stationarity, which strengthens the possibility that they are stationary.
+This property of stationary time series makes the modeling and forecasting easier.
+The log transformation restores dispersion and solves the non-stationarity problems frequently appearing in raw CPI data which are the preferred one for analysis.
+Therefore, we select the log CPI series for the next step analysis because of the it's indication of stationarity and the benefits provided by the log transformation. This decision is substantiated by both the ACF plots and the outcome of the ADF test.
+
+
+
+# Question 7
+
+```{r}
+# Generate first differenced version of the series
+diff_series <- diff(restricted_series_2)
+
+# Plot the differenced time series
+plot(diff_series, main = "First Differenced CPI Series (1974Q1 to 1988Q4)", xlab = "Quarter", ylab = "Difference")
+
+# Plot ACF of differenced series
+acf(diff_series, main = "ACF of First Differenced CPI Series")
+
+```
+To decide whether the differenced series appears stationary or not, we considered both the visual inspection of the differenced series plot.
+Since the graph bounces around a horizontal line seeming unsystematic, it implies that the series of data is stationary.
+The differenced series plot with random fluctuation around a horizontal line, and ACF plot with quick decay in autocorrelation values, and the ADF test results which supports stationarity indicates that the differenced series is likely stationary.
+
+
+# Question 8
+
+```{r}
+
+# Remove trends and seasonality from the time series
+detrended_series <- diff(diff_series)
+
+# Plot ACF for detrended series
+acf(detrended_series, main = "ACF for Detrended Series")
+
+```
+
+As the ACF plot fluctuates around zero without a discernible pattern, this means that series is stationary.
+
+
+```{r}
+# Formal test of stationarity (Augmented Dickey-Fuller test)
+adf_test_detrended <- ur.df(detrended_series, type = "drift", lags = 4)
+summary(adf_test_detrended)
+```
+
+Statistical significance of this test statistic has been established as the p-value is extremely low (p-value < 2.2e-16). Sufficient evidence to reject the null hypothesis of a unit root has been obtained. In the process we assume that the given time series to be non-stationary replacing it with the stationary one, which is referred to as rejecting the Null Hypothesis in favor of the alternative one.
+The value range for the test statistics is also represented, the ADF test statistic falls below all of them, and this is just another reason to reject the null hypothesis.
+The ADF test shows correlation with the newly found trend removed series; the test statistics are below the critical values and small p-value rejects the null hypothesis.
+The fact that the detrended time-series is stationary makes it probable that it was assembled without any trend or seasonality having its origin. The error term may be called stationary or nonstationary, which means that the model may follow an autoregressive-moving-average (ARMA) process where each observation is a function of its past values and a random error term. This indicates that there is an uncertainty on the position of the series through a Brownian-type motion without a direction.
+Therefore, it can tentatively be said that the series post detrending does not contain trend or seasonal effects, but rather appears to be stationary hence the data generation process.
+
+# Question 9
+
+```{r}
+# Classical decomposition of the time series
+decomposition <- decompose(restricted_series_2)
+
+# Plotting various time series components
+plot(decomposition)
+
+```
+
+Components are added in additive-decomposition irrespective of the magnitude of the original series. All of these elements give the same amount to the total order of the series.
+The trend, seasonality, and residuals are additive adjectives in nature omitting their effects from different levels in the series.
+The fact that the amplitudes at the time series remain quite stable over time shows that the additive decomposition fits the description best. This is caused because additive decomposition assumes the seasonal and trend components contribute the same absolute value to the series at different times during the process.
+Additive decomposition is a convenience in the analysis of the main factors. Each element is a pure algebraic change in the series, so that the effect of each component on the entire series can be easily seen.
+Since the pattern of seasonal variations is the same in terms of size throughout the series, the additive decomposition can be used.
+As decomposition method is additive, it predicts that time series is a pattern where the trend, seasonality, and residuals contribute a fixed amount to the overall series with no matter the level of the series. It follows that this seasonal adjustment approach is credible because of the uniformity of the fluctuations in the time series and the ease of interpreting the additive components.
+
+
+
